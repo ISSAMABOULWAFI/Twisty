@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>twisty</name>
+	<displayName><![CDATA[Twisty]]></displayName>
+	<version><![CDATA[0.1]]></version>
+	<description><![CDATA[Twisty is Prestashop module helps E-commerce agents to sort items by order in Warehouse. No wasting time and Energy :) ]]></description>
+	<author><![CDATA[Hamza KCHIKECH]]></author>
+	<tab><![CDATA[Administration]]></tab>
+	<is_configurable>0</is_configurable>
+	<need_instance>1</need_instance>
+	<limited_countries></limited_countries>
+</module>
