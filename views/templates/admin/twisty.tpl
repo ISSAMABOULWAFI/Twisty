@@ -135,9 +135,7 @@ var history_saved=[];
 .page-head{
 	display:none;
 }
-#content{
-	padding:10px 10px 0;
-}
+
 .panel-title{
 	padding-top:8px;
 }
@@ -231,7 +229,42 @@ table.items-list td:nth-child(2){
 	height:100px;
 	opacity:.9;
 }
+#noconnection{
+	display:none;
+	background-color:#2C3234;
+	opacity:.9;
+	width:100%;
+	height:700px;
+	position:absolute;
+	top:0px;
+	left:0px;
+	border-radius: 5px;
+	z-index:599;
+	text-align:center;
+}
+#noconnection img{
+	/*margin-top:100px;*/
+	width:70px;
+	opacity:.9;
+}
+#noconnection p{
+	margin-top:100px;
+	color:#FFF;
+	font-size:30px;
+	
+}
 
+</style>
+<style>
+#msgcache{
+	/*background-color:red;*/
+	width:200px;
+	height:200px;
+	z-index:1500;
+	position:fixed;
+	right:5px;
+	bottom:5px;
+}
 </style>
 <script src="{$base_url}js/jspdf.min.js"></script>
 <script src="{$base_url}js/jspdf.plugin.autotable.min.js"></script>
@@ -240,6 +273,12 @@ table.items-list td:nth-child(2){
 	<div id="myloading">
 		<img src="{$base_url}imgs/loading1.gif" />
 	</div>
+	
+	<div id="noconnection">
+		<p>Reconnexion...</p>
+		<img src="{$base_url}imgs/loadinginternet.gif" />
+	</div>
+	
 	<div class="panel-heading">
 		<h1 class="panel-title">Twisty</h1>
 		<span class="panel-heading-action">
@@ -248,9 +287,15 @@ table.items-list td:nth-child(2){
 					<i class="process-icon-new"></i>
 				</span>
 			</a>-->
+			<a class="list-toolbar-btn" href="javascript:twistylist.resetTwistyTableInDb()">
+				<span title="" data-toggle="tooltip" class="label-tooltip" data-original-title="Réinitialiser la liste" data-html="true" data-placement="bottom">
+					<i class="process-icon-refresh"></i>
+				</span>
+			</a>
+			
 			<a class="list-toolbar-btn" href="javascript:twistylist.populateTwistyTableInDb()">
 				<span title="" data-toggle="tooltip" class="label-tooltip" data-original-title="Rafraîchir la liste" data-html="true" data-placement="bottom">
-					<i class="process-icon-refresh"></i>
+					<i class="process-icon-plus"></i>
 				</span>
 			</a>
 									
@@ -362,7 +407,7 @@ table.items-list td:nth-child(2){
 			  <td>dmoore0@furl.net</td>
 			  <td>China</td>
 			  <td>211.56.242.221</td>
-			  <td><img src="{$base_url}imgs/carreau.png" /></td>
+			  <td><img src="" /></td>
 			  <td>211.56.242.221</td>
 			</tr>
 		  </tbody>
@@ -370,3 +415,12 @@ table.items-list td:nth-child(2){
 	</div>
 </div>
 
+
+<div class="panel" id="msgcache">
+	<div class="panel-heading" >
+			<h1 class="panel-title">Twisty</h1>
+	</div>
+	<div class="container">
+		<h2></h2>
+	</div>
+</div>

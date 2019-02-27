@@ -8,6 +8,27 @@ require_once dirname(__FILE__).'/classes/arrayCombinaison.php';
 
 class twisty extends Module {
 	  
+	  
+		
+	protected $tabvalue1_7 = array(
+		array(
+			'class_name' => 'AdminOrdersSort',
+			'id_parent' => -1,
+			'module' => 'twisty',
+			'name' => 'Twisty',
+			'active'    => 1
+		)
+	);
+
+	public $all_tabs = array(
+		array(
+	        'class_name' => 'Adminxippost',
+	        'id_parent' => 'parent',
+	        'name' => 'Blog Posts',
+		)
+	);
+	public static $ModuleName = 'twisty';
+	
 	protected $tabs = [
         [
             'name'      => 'Twisty',
@@ -25,7 +46,11 @@ class twisty extends Module {
 		$this->author = 'ERRAMY NOUREDDINE';
 		$this->description = 'Twisty is Prestashop module helps E-commerce agents to sort items by order in Warehouse. No wasting time and Energy :) ';
 		$this->bootstrap=true;
+		
+		
+		
 		parent::__construct();
+		
 	}
 	public function loadSQLFile($sql_file)
 	{
@@ -59,7 +84,16 @@ class twisty extends Module {
 		if (!$this->loadSQLFile($sql_file))
 			return false;	
 		
-		$this->addTab($this->tabs);
+		
+		$vrs=substr(_PS_VERSION_,0,3);
+		if($vrs=='1.7'){
+			$this->Register_Tabs() ;
+		}else{
+			
+			$this->addTab($this->tabs);
+		}
+		
+		
 		
 		return true;
 	}
@@ -67,13 +101,19 @@ class twisty extends Module {
 	public function uninstall()
 	{
 		//$this->removeTab($this->tabs);
-		$this->removeTab($this->tabs);
+		$vrs=substr(_PS_VERSION_,0,3);
+		if($vrs=='1.7'){
+			$this->UnRegister_Tabs();
+		}else{
+			$this->removeTab($this->tabs);
+		}
+		
 		$this->unregisterHook('displayBackOfficeHeader');
 		$this->unregisterHook('actionAdminControllerSetMedia');
 		$this->unregisterHook('header');
 		
 		$sql_file = dirname(__FILE__).'/install/uninstall.sql';
-	    if (!$this->loadSQLFile($sql_file))
+	    if (!$this->loadSQLFile($sql_file) )
 			return false;
 
 		
@@ -338,15 +378,20 @@ class twisty extends Module {
 	{
 	  // echo "<script>console.log( 'hookDisplayBackOfficeHeader' );</script>";
 	   //echo "<script>console.log( '".($this->MODULE_DIR) . 'css/tab.css'."' );</script>";
-	   $this->context->controller->addCSS($this->_path . 'css/tab.css');
-	   
+		$this->context->controller->addCSS($this->_path . 'css/tab.css');
+		$vrs=substr(_PS_VERSION_,0,3);
+		if($vrs=='1.7'){
+			$this->context->controller->addCSS($this->_path . 'css/style1_7.css');
+		}
 	}
 	public function hookActionAdminControllerSetMedia($params)
 	{
 		//echo "<script>console.log( 'hookActionAdminControllerSetMedia' );</script>";
 		if ($this->context->controller->controller_name == 'AdminOrdersSort'){ 
 			//$this->context->controller->addCSS(($this->_path) . 'css/bootstrap-tagsinput.css');	
-			//$this->context->controller->addJS(($this->_path) . 'js/bootstrap-checkbox.js');			
+			//$this->context->controller->addJS(($this->_path) . 'js/bootstrap-checkbox.js');	
+			
+			$this->context->controller->addJS(($this->_path) . 'js/jquery.cookie.js');
 			$this->context->controller->addJS(($this->_path) . 'js/script.js');
 			//$this->context->controller->addJS(($this->_path) . 'js/classes.js');
 			
@@ -359,4 +404,64 @@ class twisty extends Module {
 		//$this->context->controller->addCss(($this->_path).'css/tab.css');
 	}
 	
+	
+	public function Register_Tabs()
+	{
+		$tabs_lists = array();
+        $langs = Language::getLanguages();
+        $id_lang = (int)Configuration::get('PS_LANG_DEFAULT');
+        $save_tab_id = $this->Register_ETabs();
+    	/*if(isset($this->all_tabs) && !empty($this->all_tabs)){
+    		foreach ($this->all_tabs as $tab_list)
+    		{
+    		    $tab_listobj = new Tab();
+    		    $tab_listobj->class_name = $tab_list['class_name'];
+    		    $tab_listobj->id_parent = $save_tab_id;
+    		    if(isset($tab_list['module']) && !empty($tab_list['module'])){
+    		    	$tab_listobj->module = $tab_list['module'];
+    		    }else{
+    		    	$tab_listobj->module = $this->name;
+    		    }
+    		    foreach($langs as $l)
+    		    {
+    		    	$tab_listobj->name[$l['id_lang']] = $this->l($tab_list['name']);
+    		    }
+    		    $tab_listobj->save();
+    		}
+    	}*/
+        return true;
+    }
+	public function Register_ETabs(){
+		$tabpar_listobj = new Tab();
+		$langs = Language::getLanguages();
+		$id_parent = (int)Tab::getIdFromClassName("IMPROVE");
+		$tabpar_listobj->class_name = 'AdminOrdersSort';
+		$tabpar_listobj->id_parent = $id_parent;
+		$tabpar_listobj->module = $this->name;
+		foreach($langs as $l)
+	    {
+	    	$tabpar_listobj->name[$l['id_lang']] = "Twisty";
+	    }
+	    if($tabpar_listobj->save()){
+	    	return (int)$tabpar_listobj->id;
+	    }else{
+	    	return (int)$id_parent;
+	    }
+	}
+	public function UnRegister_Tabs()
+	{
+		/*if(isset($this->all_tabs) && !empty($this->all_tabs)){
+			foreach($this->all_tabs as $tab_list){
+				$tab_list_id = Tab::getIdFromClassName($tab_list['class_name']);
+			    if(isset($tab_list_id) && !empty($tab_list_id)){
+			        $tabobj = new Tab($tab_list_id);
+			        $tabobj->delete();
+			    }
+			}
+		}*/
+		$tabp_list_id = Tab::getIdFromClassName('AdminOrdersSort');
+		$tabpobj = new Tab($tabp_list_id);
+	    $tabpobj->delete();
+        return true;
+	}
 }

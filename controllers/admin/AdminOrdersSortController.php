@@ -42,6 +42,8 @@ class AdminOrdersSortController extends AdminController{
 			$action=$_GET['action'];
 			if($action=="populatetwistylist"){
 				$this->populatetwistylist();
+			}else if($action=="resettwistytableindb"){
+				$this->resettwistytableindb();
 			}else if($action=="gettwistylist"){
 				$this->gettwistylist();
 			}else if($action=="removetwistylist"){
@@ -56,6 +58,8 @@ class AdminOrdersSortController extends AdminController{
 				$this->removeoutofstockorders();
 			}else if($action=="removeoutofstockorder"){
 				$this->removeoutofstockorder();
+			}else if($action=="reset_cookie"){
+				$this->reset_cookie();
 			}
 			
 			
@@ -176,6 +180,13 @@ class AdminOrdersSortController extends AdminController{
 		}
 		return $res;
 	}
+	
+	public function resettwistytableindb(){
+		OrdersModel::removealltwistylist();
+		$this->populatetwistylist();
+	}
+	
+	
    	public function populatetwistylist(){
 		
 		$twistyOrders=OrdersModel::getTwistyOrdersDetailRows();
@@ -484,6 +495,10 @@ class AdminOrdersSortController extends AdminController{
 			OrdersModel::resetOrder($id_order);
 		}
 	}
-	
+	public function reset_cookie(){
+		echo "reset_cookie";
+		$cookie = Context::getContext()->cookie;
+		$cookie->write();
+	}
 }
 

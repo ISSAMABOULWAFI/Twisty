@@ -84,6 +84,14 @@ class OrdersModel {
 		}
 	}
 	
+	public static function removealltwistylist(){
+		if(Db::getInstance()->delete('twisty_orders')){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
 	public static function removeFinishedOrders($id){
 		/*$ids="";
 		foreach($list as $id){
@@ -180,6 +188,26 @@ class OrdersModel {
 		}
 	}
 	
+	public static function getTwistyListForFront(){
+		/*$sql = 'SELECT id_twisty,id_order,product_ean13,product_quantity,tor.id_order_detail,qte_picked,id_box,is_finished,date_twisty '.
+		'FROM '._DB_PREFIX_.'twisty_orders  tor '.
+		'LEFT JOIN '._DB_PREFIX_.'order_detail od ON  od.id_order_detail=tor.id_order_detail ';
+		*/
+		$sql = 'SELECT id_twisty,product_name,ord.id_order,ord.total_paid_tax_incl,od.product_reference,product_ean13,product_quantity,tor.id_order_detail,qte_picked,id_box,is_finished,date_twisty,payment,total_shipping '.
+		'FROM '._DB_PREFIX_.'twisty_orders  tor '.
+		'LEFT JOIN '._DB_PREFIX_.'order_detail od ON  od.id_order_detail=tor.id_order_detail '.
+		'LEFT JOIN '._DB_PREFIX_.'orders ord ON  ord.id_order=od.id_order '.
+		'WHERE ord.id_order in ('.
+		'	SELECT id_order '.
+		'	FROM '._DB_PREFIX_.'twisty_orders  tor '.
+		'	LEFT JOIN '._DB_PREFIX_.'order_detail od ON  od.id_order_detail=tor.id_order_detail '.
+		'	GROUP BY id_order '.
+		'	HAVING count(tor.id_order_detail)=sum(is_valid) and count(tor.id_order_detail)=sum(tor.is_show) '.
+		') '.
+		'ORDER BY id_box,product_ean13';
+		if ($results = Db::getInstance()->ExecuteS($sql))
+			return $results;
+	}
 }
 
 

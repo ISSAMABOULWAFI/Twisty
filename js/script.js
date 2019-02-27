@@ -14,6 +14,8 @@ var compteur=null;
 var finishColor="#B7E1CD";
 var inProgColor="#FCE8B2";
 var beginColor="#F4C7C3";
+var clignoteColor="#3AE2CE";
+var nonet='#noconnection';
 //classes
 
 /*
@@ -88,6 +90,27 @@ var BoxNameDiv = function(){
 	}
 	this.setStyle = function(style){
 		$(idBox).css(style);
+	}
+	this.clignote = function(mainColor,secondColor,found){
+		//var mainColor='#FFFFFF';
+		//var secondColor='#3AE2CE';
+		
+		console.log("clignote");
+		var timesRun=0;
+		var backgroundInterval = setInterval(function () {
+			$(msgBox).parent().parent().css("background-color", function () {
+				this.switch = !this.switch
+				return this.switch ? secondColor : ""
+			});
+			timesRun++;
+			if(timesRun === 7){
+				if(found)
+					$(msgBox).parent().parent().css("background-color",secondColor);
+				else
+					$(msgBox).parent().parent().css("background-color",mainColor);
+				clearInterval(backgroundInterval);
+			}
+		}, 100);
 	}
 	
 	this.construct();
@@ -311,7 +334,7 @@ var TwistyList = function(){
 		$.ajax({
 			url: contr_link+"&action=gettwistylist",
 			beforeSend: function( xhr ) {
-				$(loadingimg).show();
+				$(loadingbox).show();
 				$(msg).text('Récupération des commandes TWISTY de la BD');
 			}
 		})
@@ -336,7 +359,7 @@ var TwistyList = function(){
 		.fail(function(xhr, textStatus, errorThrown) {
 			$(msg).text(xhr.responseText);
 		}).always(function(){
-			$(loadingimg).hide();
+			$(loadingbox).hide();
 		});
 	}
 	
@@ -345,24 +368,56 @@ var TwistyList = function(){
 		$.ajax({
 			url: contr_link+"&action=populatetwistylist",
 			beforeSend: function( xhr ) {
-				$(loadingimg).show();
+				//$(loadingimg).show();
 				$(loadingbox).show();
 				$(msg).text('Remplissage de la table des commandes TWISTY dans la BD');
 			}
 		})
 		.done(function( data ) {
-			console.log(data);
+			//console.log(data);
+			//$(msg).text('Réussi');
+			root.refreshFromDb();
+			//$(nonet).hide();
+		})
+		.fail(function(xhr, textStatus, errorThrown) {
+			//console.log(xhr.textStatus);
+			//$(msg).text(xhr.responseText);
+			
+			
+			//$(nonet).show();
+			alert('Erreur de connexion! \nRéessayer plus tard');
+			$(loadingbox).hide();
+		}).always(function(){
+			//$(loadingimg).hide();
+			//$(loadingbox).hide();
+		});
+	}
+	
+	this.resetTwistyTableInDb = function(){
+		$.ajax({
+			url: contr_link+"&action=resettwistytableindb",
+			beforeSend: function( xhr ) {
+
+				$(loadingbox).show();
+				$(msg).text('Remplissage de la table des commandes TWISTY dans la BD');
+			}
+		})
+		.done(function( data ) {
+			//console.log(data);
 			//$(msg).text('Réussi');
 			root.refreshFromDb();
 		})
 		.fail(function(xhr, textStatus, errorThrown) {
-			console.log(xhr.responseText);
-			$(msg).text(xhr.responseText);
+			//console.log(xhr.responseText);
+			//$(msg).text(xhr.responseText);
+			alert('Erreur de connexion! \nRéessayer plus tard');
+			(loadingbox).hide();
 		}).always(function(){
-			$(loadingimg).hide();
-			$(loadingbox).hide();
+			
 		});
 	}
+	
+	
 	
 	this.show = function(){
 		list.forEach(function(item){
@@ -542,7 +597,7 @@ var TwistyList = function(){
 	}
 	
 	this.pick_item = function(ean,is_code_article){
-		
+		console.log('pick_item');
 		var id_order=this.chooseOrderForPicking(ean,is_code_article);
 		//console.log(id_order);
 		if(id_order==-1){
@@ -550,6 +605,7 @@ var TwistyList = function(){
 			boxNameElement.hideIdBox();
 			boxNameElement.setErrorMsg('Article non trouvé!');
 			boxNameElement.showMsgBox();
+			boxNameElement.clignote('#FFFFFF',clignoteColor,false);
 			//boxNameElement.setStyle({'font-size': '10px;'});
 			//boxNameElement.setId('Article non trouvé!');
 		}else{
@@ -563,17 +619,22 @@ var TwistyList = function(){
 						boxNameElement.setId(item.vars.id_box);
 						boxNameElement.showIdBox();
 						
+						
 						if(root.getOrdersInfos(item.vars.id_order).getStatuCode()==0){
 							//console.log('0');
 							$("#right-box").css('background-color',beginColor);
+							boxNameElement.clignote('#FFFFFF',beginColor,true);
+						
 						}
 						if(root.getOrdersInfos(id_order).getStatuCode()==1){
 							//console.log('1');
 							$("#right-box").css('background-color',inProgColor);
+							boxNameElement.clignote('#FFFFFF',inProgColor,true);
 						}
 						if(root.getOrdersInfos(item.vars.id_order).getStatuCode()==2){
 							//console.log('2');
 							$("#right-box").css('background-color',finishColor);
+							boxNameElement.clignote('#FFFFFF',finishColor,true);
 						}
 						//console.log();
 						
@@ -607,14 +668,17 @@ var TwistyList = function(){
 						if(root.getOrdersInfos(item.vars.id_order).getStatuCode()==0){
 							//console.log('0');
 							$("#right-box").css('background-color',beginColor);
+							boxNameElement.clignote('#FFFFFF',beginColor,true);
 						}
 						if(root.getOrdersInfos(id_order).getStatuCode()==1){
 							//console.log('1');
 							$("#right-box").css('background-color',inProgColor);
+							boxNameElement.clignote('#FFFFFF',inProgColor,true);
 						}
 						if(root.getOrdersInfos(item.vars.id_order).getStatuCode()==2){
 							//console.log('2');
 							$("#right-box").css('background-color',finishColor);
+							boxNameElement.clignote('#FFFFFF',finishColor,true);
 						}
 						//console.log();
 						
@@ -645,7 +709,8 @@ var TwistyList = function(){
 		if($(history).length>0 && !is_db_occuped){
 			var list_copy=list.slice();
 			var history_copy=history.slice();
-			history=[];
+			//console.log("history_copy:"+history_copy);
+			
 			
 			
 			$.ajax({
@@ -660,11 +725,25 @@ var TwistyList = function(){
 			})
 			.done(function( data ) {
 				//console.log( "Success \n" + data );
-				
+				console.log('Saved');
+				history=[];
+				//$.cookie("mycookie", null);
+				//$(noconnexion).hide();
+				//console.log(nonet);
+				$(nonet).hide();
 			}).fail(function(){
-				history=history.concat(history_copy).unique();
-				alert('Problem while saving to db.');
+				//history=history.concat(history_copy).unique();
+				//history=history.concat(history_copy);
+				//console.log(list_copy);
+				//var s=
+				//$.cookie("mycookie", JSON.stringify(history_copy));
+				
+				//alert('Problem while saving to db.');
+				//console.log("-"+nonet);
+				$(nonet).show();
+				console.log('Not Saved');
 			}).always(function(){
+				//console.log(history_copy);
 				is_db_occuped=false;
 				if(myurl!=null)
 					window.location.href = myurl;
@@ -766,11 +845,44 @@ function init(){
 		compteur=setInterval(twistylist.saveToDb, 5000);
 	})();
 	
-	
+	(window.resetCookieCompteur=function(){
+		if(resetCookieCompteur!=null)
+			clearInterval(resetCookieCompteur);
+		resetCookieCompteur=setInterval(reset_cookie, 240000);
+	})();
 	//console.log(twistylist.getOrdersIds());
 }
 
+function reset_cookie(){
+	
+	//alert();
+	
+	
+	
+	$.ajax({
+		type: 'POST',
+		url: contr_link+"&action=reset_cookie",
+		data: { },
+		beforeSend: function( xhr ) {
+			//console.log("beforesend");
+			//is_db_occuped=true;
+			
+		}
+	})
+	.done(function( data ) {
+		console.log( data );
+		
+	}).fail(function(){
+		//history=history.concat(history_copy).unique();
+		console.log('Problem .');
+	}).always(function(){
+		
+	});
+	
+}
+
 $(document).ready(function(){
+	
 	
 	
 	configureEanInput();
@@ -778,13 +890,23 @@ $(document).ready(function(){
 	catchRedirectEvent();
 	
 	
-	$('#content').css('padding','10px 10px 0');
+	$('#content').css('padding-top','10px');
 	
 	loadingimg=$('#debug-bar .loading-img');
 	loadingbox=$('#myloading');
 	msg=$('#debug-bar .msg');
 
 	init();
+	
+	$('#msgcache').css({'position':'fixed','right':'5px','bottom':'5px','display':'none'});
+	
+	
+	/*if($.cookie("mycookie")){
+		$('div#msgcache div.container').empty();
+		$('div#msgcache div.container').append('<h2>'+$.cookie("mycookie")+'</h2>');
+		
+		//alert();
+	}*/
 	
 });
  
@@ -818,6 +940,9 @@ window.initResetButtonEvents = function(){
 
 function configureEanInput(){
 	$('#formean').submit(function(){
+		/*if($(nonet).is(":visible")){
+			return false;
+		}*/
 		var len=($( "#ine" ).val()).length;
 		
 		if(len>=6 && len<=12){
@@ -826,9 +951,12 @@ function configureEanInput(){
 			submit_ean13($( "#ine" ).val());
 	    }else if(len==30){
 			submit_ean($( "#ine" ).val());
-	    }
-		return false;
-	});
+	    }else if(len==31){
+            var eee=$( "#ine" ).val().substring(1);
+            submit_ean(eee);
+        }
+        return false;
+    });
 }
 
 function catchRedirectEvent(){
@@ -933,22 +1061,21 @@ function handle(e) {
 function initInputKeys(){
 	
 	$( document ).keypress(function(e) {
-		//console.log(e.which);
-		//alert('ok');
+		
+		//$(noconnection).show();
+		
 		if (!$(e.target).closest("input")[0] && e.which>=48 && e.which<=57) {
-			//new_search=true;
-			//console.log(new_search);
+			
 			$( "#ine" ).val('');
 			$( "#ine" ).focus().val(String.fromCharCode(e.which));
 			disable_new_search();
-			//$("html, body").animate({ scrollTop: 0 }, "slow");
-			//$( "#ine" ).;
-			//console.log( "[TWISTY]"+ e.which );
-			//$
+			
+			return false;
 		}
 	});
 
 	var kinput = document.getElementById('ine');
+	$(kinput).attr('autocomplete', 'off');
 	kinput.onkeydown = kinput.onkeyup = kinput.onkeypress = handle;
 	/*
 	$('#ine').keypress(function(e) {
@@ -997,6 +1124,8 @@ window.download_pdf=function() {
 	var ordersIds=twistylist.getOrdersIds();
 	
 	
+	var image="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYDAwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAAZABkDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDw3/g3p/4N6fgv/wAFZv2L/E/xG+I3if4oaLrei+Nbrw3BB4b1GxtrV7eKxsLhXZZ7OZzIXupASHAwF+UEEn7w/wCIKn9lj/ofv2gP/B5pH/yso/4Mqf8AlFl4+/7KrqP/AKaNHr9fqAP54f8Agsz/AMGv3wC/4J2/8E2PiR8Y/BXi/wCMGqeJ/B/9mfYrXW9V06ewl+06pZ2cnmJDYxSHEdw5G2RcMFJyMg/hDX9fv/B0d/ygo+Of/cA/9SHTK/kCoA/d7/g1+/4LM/s2f8E7f2BfF/gr4x/Ej/hD/E+qfEC81u1sv+Ef1TUPNs5NO02FJfMtbaWMZkt5l2lgw2ZIwQT+j/8AxFHfsJ/9Fz/8szxD/wDINfyBUUAf0ff8F6v+C9X7J37aP/BJ74rfDP4afFb/AISXxt4l/sj+zdN/4RnWLP7T5GsWNzL+9uLSOJdsMMjfM4ztwMkgH+cGiigD/9k=";
+	
 	
 	ordersIds.forEach(function(id){
 		//console.log(in_array(item['id_order'],tmp));
@@ -1005,7 +1134,7 @@ window.download_pdf=function() {
 		if(order.getStatuCode()==2){
 			//console.log(order.total_qte_picked());
 			//total_paid_tax_incl
-			$(el).append('<tr><td class="col1" align="right">'+id+'</td><td>'+order.getId_box()+'</td><td>'+order.getPayment()+'</td><td>'+(parseFloat(order.getTotal_paid_tax_incl())).toFixed(2)+'</td><td>'+(parseFloat(order.getTotal_shipping())).toFixed(2)+'</td><td>'+order.getTotal_product_quantity()+'</td><td>'+order.getTotal_qte_picked()+'</td><td><img src="'+base_url+'imgs/carreau.jpg" /></td><td></td></tr>');
+			$(el).append('<tr><td class="col1" align="right">'+id+'</td><td>'+order.getId_box()+'</td><td>'+order.getPayment()+'</td><td>'+(parseFloat(order.getTotal_paid_tax_incl())).toFixed(2)+'</td><td>'+(parseFloat(order.getTotal_shipping())).toFixed(2)+'</td><td>'+order.getTotal_product_quantity()+'</td><td>'+order.getTotal_qte_picked()+'</td><td><img src="'+''+'" /></td><td></td></tr>');
 		}
 		/*if(in_array(item['id_order'],finished_orders_array)>-1 && in_array(item['id_order'],tmp)===false){
 			//console.log(item);
@@ -1017,7 +1146,6 @@ window.download_pdf=function() {
 	
 
 	//$('#basic-table tbody').append();
-	var image="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYDAwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAAZABkDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDw3/g3p/4N6fgv/wAFZv2L/E/xG+I3if4oaLrei+Nbrw3BB4b1GxtrV7eKxsLhXZZ7OZzIXupASHAwF+UEEn7w/wCIKn9lj/ofv2gP/B5pH/yso/4Mqf8AlFl4+/7KrqP/AKaNHr9fqAP54f8Agsz/AMGv3wC/4J2/8E2PiR8Y/BXi/wCMGqeJ/B/9mfYrXW9V06ewl+06pZ2cnmJDYxSHEdw5G2RcMFJyMg/hDX9fv/B0d/ygo+Of/cA/9SHTK/kCoA/d7/g1+/4LM/s2f8E7f2BfF/gr4x/Ej/hD/E+qfEC81u1sv+Ef1TUPNs5NO02FJfMtbaWMZkt5l2lgw2ZIwQT+j/8AxFHfsJ/9Fz/8szxD/wDINfyBUUAf0ff8F6v+C9X7J37aP/BJ74rfDP4afFb/AISXxt4l/sj+zdN/4RnWLP7T5GsWNzL+9uLSOJdsMMjfM4ztwMkgH+cGiigD/9k=";
 	
 	var doc = new jsPDF('p', 'pt');
 	var res = doc.autoTableHtmlToJson(document.getElementById("basic-table"));
@@ -1090,7 +1218,7 @@ window.download_pdf=function() {
 			}
 			if (opts.column.dataKey === 5) {
 				images.push({
-				  url: imgElements[i].src,
+				  url: image,
 				  x: cell.textPos.x,
 				  y: cell.textPos.y
 				});
@@ -1099,7 +1227,7 @@ window.download_pdf=function() {
 		},
 		addPageContent: function() {
 		  for (var i = 0; i < images.length; i++) {
-			doc.addImage(image, images[i].x+65, images[i].y, 10, 10);
+			doc.addImage(images[i].url, images[i].x+65, images[i].y, 10, 10);
 		  }
 		},
 		startY: doc.autoTableEndPosY() + 10
@@ -1109,7 +1237,7 @@ window.download_pdf=function() {
 
 	doc.save("table.pdf");
 }
-window.removefinishedorders=function() {
+window.removefinishedorders=function() { 
 	if(twistylist.getFinishedOrdersIds().length==0){
 		alert("Aucune Commande terminée trouvée!");
 		return;
@@ -1129,15 +1257,16 @@ window.removefinishedorders=function() {
 		}
 	})
 	.done(function( data ) {
-		console.log( data );
+		//console.log( data );
 		twistylist.refreshFromDb();
-			
+//		$(nonet).hide();	
 	}).fail(function(){
 		//history=history.concat(history_copy).unique();
-		console.log('Problem .');
+		alert('Erreur de connexion! \nRéessayer plus tard');
+		$(loadingbox).hide();
 	}).always(function(){
 		is_db_occuped=false;
-		$(loadingbox).hide();
+		//$(loadingbox).hide();
 	});
 	
 }
@@ -1163,16 +1292,17 @@ window.settooutofstock = function(){
 		}
 	})
 	.done(function( data ) {
-		console.log( data );
+		//console.log( data );
 		//twistylist.refreshFromDb();
 		twistylist.refreshFromDb();
 			
 	}).fail(function(){
 		//history=history.concat(history_copy).unique();
-		console.log('Problem .');
+		alert('Erreur de connexion! \nRéessayer plus tard');
+		$(loadingbox).hide();
 	}).always(function(){
 		is_db_occuped=false;
-		$(loadingbox).hide();
+		
 	});
 	
 }
